@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ödeme Bilgileri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #E9EEF0;
+    --card: #17324D;
+    --card-ink: #F4F7F8;
+    --card-soft: #9FB6C9;
+    --accent: #2E8B6E;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0F1820; --card: #1D4466; --card-soft: #A9C2D6; --accent: #45B894; }
+  }
+  :root[data-theme="dark"] { --bg: #0F1820; --card: #1D4466; --card-soft: #A9C2D6; --accent: #45B894; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 440px; margin: 0 auto; padding: 24px 18px 40px; }
+  .card {
+    background: var(--card);
+    color: var(--card-ink);
+    border-radius: 22px;
+    padding: 26px 22px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::after {
+    content: "";
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 28px solid rgba(255,255,255,.06);
+  }
+  .biz { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 4px; word-break: break-word; }
+  .bank { color: var(--card-soft); font-size: .95rem; font-weight: 500; margin: 0; }
+  .label { color: var(--card-soft); font-size: .8rem; font-weight: 500; margin: 26px 0 6px; }
+  .holder { font-size: 1.15rem; font-weight: 600; margin: 0; word-break: break-word; }
+  .iban {
+    font-size: 1.22rem; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em; word-spacing: .15em; line-height: 1.5;
+    margin: 0; user-select: all;
+  }
+  .copy {
+    margin-top: 22px; width: 100%;
+    border: 0; border-radius: 14px; padding: 16px;
+    font: inherit; font-weight: 700; font-size: 1rem;
+    background: var(--card-ink); color: var(--card);
+    cursor: pointer; transition: background .2s, color .2s;
+  }
+  .copy.done { background: var(--accent); color: #fff; }
+  .copy:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <section class="card" aria-label="Ödeme bilgileri">
+    <h1 class="biz" id="vBiz"></h1>
+    <p class="bank" id="vBank"></p>
+    <p class="label">Alıcı</p>
+    <p class="holder" id="vName"></p>
+    <p class="label">IBAN</p>
+    <p class="iban" id="vIban"></p>
+    <button class="copy" id="copyBtn" type="button">IBAN'ı kopyala</button>
+  </section>
+</main>
+
+<script>
+  // ==== BİLGİLERİ BURADAN DEĞİŞTİR ====
+  const BILGI = {
+    isletme: "Örnek Kafe",
+    adSoyad: "Ahmet Yılmaz",
+    iban:    "TR00 0000 0000 0000 0000 0000 00",
+    banka:   "Örnek Bankası"
+  };
+  // ====================================
+
+  const ibanTemiz = BILGI.iban.replace(/\s+/g, "").toUpperCase();
+  document.getElementById("vBiz").textContent  = BILGI.isletme;
+  document.getElementById("vName").textContent = BILGI.adSoyad;
+  document.getElementById("vBank").textContent = BILGI.banka;
+  document.getElementById("vIban").textContent = ibanTemiz.replace(/(.{4})/g, "$1 ").trim();
+  document.title = BILGI.isletme + " – IBAN";
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    const btn = this;
+    const done = () => {
+      btn.textContent = "Kopyalandı";
+      btn.classList.add("done");
+      setTimeout(() => { btn.textContent = "IBAN'ı kopyala"; btn.classList.remove("done"); }, 1800);
+    };
+    const fallback = () => {
+      const t = document.createElement("textarea");
+      t.value = ibanTemiz; t.setAttribute("readonly", "");
+      t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t); t.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(t);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ibanTemiz).then(done, fallback);
+    } else fallback();
+  });
+</script>
+</body>
+</html>
